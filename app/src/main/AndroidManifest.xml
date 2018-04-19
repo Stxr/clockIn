@@ -56,7 +56,9 @@
         <activity android:name=".ui.EmployerActivity"
             android:theme="@style/FullscreenTheme"/>
         <activity android:name=".ui.BossActivity" />
-        <activity android:name=".ui.SignUpActivity" />
+        <activity android:name=".ui.SignUpActivity"
+            android:label="注册账号"/>
+        <activity android:name=".ui.SingleFragmentActivity" />
     </application>
 
 </manifest>

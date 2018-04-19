@@ -2,61 +2,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:gravity="center"
-    android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom"
-        android:orientation="horizontal"
-        android:paddingTop="8dp">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:src="@drawable/loginuser" />
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/edt_id"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/hint_name" />
-    </LinearLayout>
+            android:hint="@string/hint_name"
+            android:minWidth="130dp" />
+    </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
+
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom"
-        android:orientation="horizontal"
-        android:paddingTop="8dp">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:src="@drawable/password" />
+        android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/edt_password"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:hint="@string/hint_password"
             android:inputType="textPassword" />
-    </LinearLayout>
+
+    </android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/btn_sign_in"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="@string/sign_in" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="35dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <TextView
@@ -68,9 +54,14 @@
             android:text="@string/find_key" />
 
         <View
-            android:layout_width="0dp"
+            android:layout_width="1dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            android:alpha="0.4"
+            android:background="@android:color/black" />
 
         <TextView
             android:id="@+id/tv_sign_up"

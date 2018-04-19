@@ -13,18 +13,36 @@
         android:clickable="true"
         tools:ignore="KeyboardInaccessibleWidget" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatButton"
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
         android:layout_margin="16dp"
-        app:backgroundTint="@color/colorPrimary"
-        app:rippleColor="@color/colorPrimaryDark"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/clock_in"
         app:layout_anchor="@id/bmapView"
-        app:layout_anchorGravity="bottom|center" />
+        app:layout_anchorGravity="bottom|right"
+        app:layout_behavior="com.stxr.clockin.ui.FloatingActionMenuBehavior"
+        app:menu_colorNormal="@color/colorPrimary"
+        app:menu_colorPressed="@color/colorPrimaryDark">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_clockIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/clock_in"
+            app:fab_colorNormal="@color/colorPrimary"
+            app:fab_colorPressed="@color/colorPrimaryDark"
+            app:fab_label="打卡" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_leave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_leave"
+            app:fab_colorNormal="@color/colorPrimary"
+            app:fab_colorPressed="@color/colorPrimaryDark"
+            app:fab_label="请假" />
+    </com.github.clans.fab.FloatingActionMenu>
+
 
 </android.support.design.widget.CoordinatorLayout>

@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 
 public class ShareUtil {
 
-    public static final String NAME = "ACCOUNT";
+    public static String NAME = "ACCOUNT";
 
     /**
      * 存入数据

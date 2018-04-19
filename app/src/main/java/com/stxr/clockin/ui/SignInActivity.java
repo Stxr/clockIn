@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.stxr.clockin.R;
 import com.stxr.clockin.entity.MyUser;
+import com.stxr.clockin.utils.SavePassword;
+import com.stxr.clockin.utils.ShareUtil;
 import com.stxr.clockin.utils.ToastUtil;
 
 import butterknife.BindView;
@@ -45,10 +47,20 @@ public class SignInActivity extends BaseActivity {
         dir = intent.getIntExtra(NAME, ChooseActivity.EMPLOYER);
         if (dir == ChooseActivity.BOSS) {
             setTitle("管理员登录");
+            String name = SavePassword.getBossName(this);
+            if (!name.equals("")) {
+                edt_id.setText(name);
+                edt_password.setText(SavePassword.getBossPassword(this,name));
+            }
             //管理员不可注册
             tv_sign_up.setVisibility(View.GONE);
         } else {
             setTitle("职工登录");
+            String name = SavePassword.getEmployerName(this);
+            if (name != null) {
+                edt_id.setText(name);
+                edt_password.setText(SavePassword.getEmployerPassword(this,name));
+            }
         }
     }
 
@@ -68,6 +80,7 @@ public class SignInActivity extends BaseActivity {
                             } else {
                                 if (!myUser.isBoss()) {
                                     startActivity(EmployerActivity.class);
+                                    SavePassword.saveEmployerPassword(SignInActivity.this,myUser.getUsername(),edt_password.getText().toString());
                                     finish();
                                 } else {
                                     ToastUtil.show(SignInActivity.this, "账号密码错误");
@@ -81,6 +94,7 @@ public class SignInActivity extends BaseActivity {
                         @Override
                         public void done(MyUser myUser, BmobException e) {
                             if (e == null && myUser.isBoss()) {
+                                SavePassword.saveBossPassword(SignInActivity.this,myUser.getUsername(),edt_password.getText().toString());
                                 startActivity(BossActivity.class);
                             } else {
                                 ToastUtil.show(SignInActivity.this, "账号密码错误");
