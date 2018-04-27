@@ -4,16 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.stxr.clockin.R;
 import com.stxr.clockin.entity.MyUser;
 import com.stxr.clockin.utils.SavePassword;
-import com.stxr.clockin.utils.ShareUtil;
 import com.stxr.clockin.utils.ToastUtil;
 
 import butterknife.BindView;
@@ -31,6 +28,8 @@ public class SignInActivity extends BaseActivity {
     public static final int SIGN_IN_REQUEST_CODE = 110;
     public static final String NAME = "level";
     public static int dir;
+    private CustomLoadingDialog dialog;
+
     @BindView(R.id.tv_sign_up)
     TextView tv_sign_up;
     @BindView(R.id.edt_id)
@@ -43,6 +42,8 @@ public class SignInActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         ButterKnife.bind(this);
+        dialog = new CustomLoadingDialog(this,"正在登陆");
+
         Intent intent = getIntent();
         dir = intent.getIntExtra(NAME, ChooseActivity.EMPLOYER);
         if (dir == ChooseActivity.BOSS) {
@@ -71,10 +72,12 @@ public class SignInActivity extends BaseActivity {
                 MyUser user = new MyUser();
                 user.setUsername(edt_id.getText().toString());
                 user.setPassword(edt_password.getText().toString());
+                dialog.show();
                 if (dir == ChooseActivity.EMPLOYER) {
                     user.login(new SaveListener<MyUser>() {
                         @Override
                         public void done(MyUser myUser, BmobException e) {
+                            dialog.dismiss();
                             if (e != null) {
                                 ToastUtil.show(SignInActivity.this, e.getMessage());
                             } else {
@@ -93,6 +96,7 @@ public class SignInActivity extends BaseActivity {
                     user.login(new SaveListener<MyUser>() {
                         @Override
                         public void done(MyUser myUser, BmobException e) {
+                            dialog.dismiss();
                             if (e == null && myUser.isBoss()) {
                                 SavePassword.saveBossPassword(SignInActivity.this,myUser.getUsername(),edt_password.getText().toString());
                                 startActivity(BossActivity.class);

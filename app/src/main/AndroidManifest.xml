@@ -59,6 +59,18 @@
         <activity android:name=".ui.SignUpActivity"
             android:label="注册账号"/>
         <activity android:name=".ui.SingleFragmentActivity" />
+        <activity android:name=".ui.AskForLeaveActivity"
+            android:label="请假申请"/>
+
+        <provider
+            android:authorities="com.stxr.clockin.photo_provider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/files"/>
+        </provider>
     </application>
 
 </manifest>

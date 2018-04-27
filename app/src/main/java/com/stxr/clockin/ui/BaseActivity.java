@@ -20,6 +20,7 @@ import com.stxr.clockin.R;
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
+    protected final String TAG = this.getClass().getSimpleName();
     private int requestCode=32;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

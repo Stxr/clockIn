@@ -1,62 +1,68 @@
 package com.stxr.clockin.ui;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.FileProvider;
+import android.view.View;
 
-import com.baidu.location.BDAbstractLocationListener;
-import com.baidu.location.BDLocation;
-import com.baidu.location.LocationClient;
-import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.MapStatus;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
-import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.MyLocationConfiguration;
-import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.github.clans.fab.FloatingActionButton;
 import com.stxr.clockin.R;
 import com.stxr.clockin.entity.ClockIn;
 import com.stxr.clockin.entity.MyUser;
 import com.stxr.clockin.utils.ToastUtil;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.SaveListener;
+import cn.bmob.v3.listener.UploadFileListener;
 
 /**
  * Created by stxr on 2018/4/15.
  */
 
-public class EmployerActivity extends BaseActivity implements SensorEventListener {
-    private LocationClient mLocationClient = null;
-    private MyLocationListener myListener = new MyLocationListener();
-    private BaiduMap mBaiduMap;
-    private double mCurrentLat = 0.0;
-    private double mCurrentLon = 0.0;
-    private boolean isFirstLoc = true;
-    //得到方向传感器
-    private SensorManager sensorManager;
-    private MyLocationData locData;
+public class EmployerActivity extends BaseMapActivity {
+    public static final int REQUEST_PHOTO = 123;
+    private ClockIn clockIn;
+    //请假菜单
+    private FloatingActionButton fab_leave;
+    private FloatingActionButton fab_clockIn;
 
-    @BindView(R.id.bmapView)
-    MapView mMapView;
-    private int mCurrentDirection = 0;
-    private double lastX;
-    private float mCurrentAccracy;
+
+    @Override
+    List<FloatingActionButton> addFab() {
+        List<FloatingActionButton> buttons = new ArrayList<>();
+        fab_leave = createFAB(R.color.colorPrimary, R.color.colorPrimaryDark, R.drawable.ic_leave, "请假");
+        fab_clockIn = createFAB(R.color.colorPrimary, R.color.colorPrimaryDark, R.drawable.clock_in, "打卡");
+        buttons.add(fab_clockIn);
+        buttons.add(fab_leave);
+        return buttons;
+    }
+
+    @Override
+    LatLng firstFocusOnMap() {
+        return null;
+    }
+
+    @Override
+    float zoom() {
+        return 20;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_employer);
-        ButterKnife.bind(this);
         if (getSupportActionBar() != null) {
             //隐藏标题栏
             getSupportActionBar().hide();
@@ -65,39 +71,58 @@ public class EmployerActivity extends BaseActivity implements SensorEventListene
     }
 
     private void initData() {
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorManager.registerListener(this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
-                , SensorManager.SENSOR_DELAY_UI);
-
-        mMapView.showZoomControls(false);
-        mBaiduMap = mMapView.getMap();
-        mLocationClient = new LocationClient(getApplicationContext());
-        mLocationClient.registerLocationListener(myListener);
-        option();
-        mLocationClient.start();
-        // 开启定位图层
-        mBaiduMap.setMyLocationEnabled(true);
-        mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(20));
-        //设置定位样式
-        MyLocationConfiguration config = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.FOLLOWING,
-                true,
-                null);
-        mBaiduMap.setMyLocationConfiguration(config);
+        fab_clockIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fab_menu.close(true);
+                clockIn();
+            }
+        });
+        fab_leave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fab_menu.close(true);
+                askForLeave();
+            }
+        });
     }
 
     //签到
-    @OnClick(R.id.fab_clockIn)
     void clockIn() {
-        ClockIn clockIn = new ClockIn();
-        clockIn.setLatitude(mCurrentLat);
-        clockIn.setLongitude(mCurrentLon);
+        clockIn = new ClockIn();
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //Android 7.0 以上需要用FileProvider来加载图片
+        Uri uri = FileProvider.getUriForFile(this,
+                "com.stxr.clockin.photo_provider",
+                ClockInLab.getPhotoFile(EmployerActivity.this, clockIn));
+        //赋予权限
+        List<ResolveInfo> resInfoList = getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        }
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivityForResult(intent, REQUEST_PHOTO);
+    }
+
+    //请假
+    void askForLeave() {
+        startActivity(AskForLeaveActivity.class);
+    }
+
+    private void updateData(BmobFile file) {
+        //设置经纬度
+        clockIn.setLatitude(currentLocation.getLatitude());
+        clockIn.setLongitude(currentLocation.getLongitude());
+        //绑定用户
         clockIn.setUser(BmobUser.getCurrentUser(MyUser.class));
+        clockIn.setPhotoFile(file);
         clockIn.save(new SaveListener<String>() {
             @Override
             public void done(String s, BmobException e) {
                 if (e == null) {
-                    Snackbar.make(mMapView, "打卡成功", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mapView, "打卡成功", Snackbar.LENGTH_SHORT).show();
                 } else {
                     ToastUtil.show(EmployerActivity.this, e.getMessage());
                 }
@@ -105,87 +130,29 @@ public class EmployerActivity extends BaseActivity implements SensorEventListene
         });
     }
 
-
-    void option() {
-        LocationClientOption option = new LocationClientOption();
-        option.setOpenGps(true); // 打开gps
-        option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(1000);
-        mLocationClient.setLocOption(option);
-    }
-
     @Override
-    protected void onDestroy() {
-        //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
-        super.onDestroy();
-        mMapView.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //在activity执行onResume时执行mMapView. onResume ()，实现地图生命周期管理
-        mMapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //在activity执行onPause时执行mMapView. onPause ()，实现地图生命周期管理
-        mMapView.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        sensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        double x = sensorEvent.values[SensorManager.DATA_X];
-        if (Math.abs(x - lastX) > 1.0) {
-            mCurrentDirection = (int) x;
-            locData = new MyLocationData.Builder()
-                    .accuracy(mCurrentAccracy)
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(mCurrentDirection).latitude(mCurrentLat)
-                    .longitude(mCurrentLon).build();
-            mBaiduMap.setMyLocationData(locData);
-        }
-        lastX = x;
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-
-    public class MyLocationListener extends BDAbstractLocationListener {
-        @Override
-        public void onReceiveLocation(BDLocation location) {
-            // map view 销毁后不在处理新接收的位置
-            if (location == null || mMapView == null) {
-                return;
-            }
-            mCurrentLat = location.getLatitude();
-            mCurrentLon = location.getLongitude();
-            mCurrentAccracy = location.getRadius();
-            locData = new MyLocationData.Builder()
-                    .accuracy(mCurrentAccracy)
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(mCurrentDirection).latitude(location.getLatitude())
-                    .longitude(location.getLongitude()).build();
-
-            if (isFirstLoc) {
-                isFirstLoc = false;
-                LatLng ll = new LatLng(location.getLatitude(),
-                        location.getLongitude());
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(ll).zoom(18.0f);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-            }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PHOTO && resultCode == -1) {
+            //取消权限
+            Uri uri = FileProvider.getUriForFile(this,
+                    "com.stxr.clockin.photo_provider",
+                    ClockInLab.getPhotoFile(EmployerActivity.this, clockIn));
+            revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            final BmobFile file = new BmobFile(new File(ClockInLab.getPhotoPath(this, clockIn)));
+            dialog.show("正在上传打卡信息");
+            file.uploadblock(new UploadFileListener() {
+                @Override
+                public void done(BmobException e) {
+                    dialog.dismiss();
+                    if (e == null) {
+                        updateData(file);
+                    } else {
+                        ToastUtil.show(EmployerActivity.this, e.getMessage());
+                    }
+                }
+            });
         }
     }
+
 }
