@@ -13,15 +13,19 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.model.LatLngBounds;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.stxr.clockin.R;
+import com.stxr.clockin.entity.ClockIn;
 
+import java.time.Clock;
 import java.util.List;
 
 import butterknife.BindView;
@@ -46,10 +50,9 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
     //当前所在位置
     protected BDLocation currentLocation;
     private MyLocationListener locationListener = new MyLocationListener();
-    private boolean isFirstLoc;
+    private boolean isFirstLoc=true;
 
 
-    private float currentAccracy;
     private MyLocationData locData;
     private int currentDirection = 0;
     private double lastX;
@@ -124,12 +127,14 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
         double x = sensorEvent.values[SensorManager.DATA_X];
         if (Math.abs(x - lastX) > 1.0) {
             currentDirection = (int) x;
-            locData = new MyLocationData.Builder()
-                    .accuracy(currentLocation.getRadius())
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(currentDirection).latitude(currentLocation.getLatitude())
-                    .longitude(currentLocation.getLongitude()).build();
-            baiduMap.setMyLocationData(locData);
+            if (currentLocation != null) {
+                locData = new MyLocationData.Builder()
+                        .accuracy(currentLocation.getRadius())
+                        // 此处设置开发者获取到的方向信息，顺时针0-360
+                        .direction(currentDirection).latitude(currentLocation.getLatitude())
+                        .longitude(currentLocation.getLongitude()).build();
+                baiduMap.setMyLocationData(locData);
+            }
         }
         lastX = x;
     }
@@ -194,7 +199,6 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
                 return;
             }
             currentLocation = location;
-            currentAccracy = location.getRadius();
             locData = new MyLocationData.Builder()
                     .accuracy(location.getRadius())
                     // 此处设置开发者获取到的方向信息，顺时针0-360
@@ -212,6 +216,15 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
                 baiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
         }
+    }
+    protected void focusCluster(List<ClockIn> clockIns) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (ClockIn clockIn : clockIns) {
+            builder = builder.include(new LatLng(clockIn.getLatitude(), clockIn.getLongitude()));
+        }
+        LatLngBounds bounds = builder.build();
+        MapStatusUpdate u = MapStatusUpdateFactory.newLatLngBounds(bounds,mapView.getWidth(),mapView.getHeight());
+        baiduMap.animateMapStatus(u);
     }
 }
 

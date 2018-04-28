@@ -1,5 +1,11 @@
 package com.stxr.clockin.entity;
 
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.model.LatLng;
+import com.stxr.clockin.R;
+import com.stxr.clockin.utils.clusterutil.clustering.ClusterItem;
+
 import java.util.UUID;
 
 import cn.bmob.v3.BmobObject;
@@ -10,9 +16,9 @@ import cn.bmob.v3.datatype.BmobFile;
  * 签到
  */
 
-public class ClockIn extends BmobObject {
+public class ClockIn extends BmobObject implements ClusterItem{
     private double latitude;
-    private double Longitude;
+    private double longitude;
     private String photoName;
     private BmobFile photoFile;
 
@@ -21,6 +27,7 @@ public class ClockIn extends BmobObject {
         if (getObjectId() == null) {
             setObjectId(UUID.randomUUID().toString());
         }
+        photoName = "IMG_" + getObjectId() + ".jpg";
     }
 
     private MyUser user;
@@ -34,11 +41,11 @@ public class ClockIn extends BmobObject {
     }
 
     public double getLongitude() {
-        return Longitude;
+        return longitude;
     }
 
     public void setLongitude(double longitude) {
-        Longitude = longitude;
+        this.longitude = longitude;
     }
 
     public MyUser getUser() {
@@ -49,9 +56,8 @@ public class ClockIn extends BmobObject {
         this.user = user;
     }
 
-
     public String getPhotoName() {
-        return "IMG_" + getObjectId() + ".jpg";
+        return photoName;
     }
 
     public BmobFile getPhotoFile() {
@@ -66,11 +72,24 @@ public class ClockIn extends BmobObject {
     public String toString() {
         return "ClockIn{" +
                 "latitude=" + latitude +
-                ", Longitude=" + Longitude +
+                ", longitude=" + longitude +
                 ", photoName='" + photoName + '\'' +
                 ", photoFile=" + photoFile +
                 ", user=" + user +
                 '}';
     }
 
+    @Override
+    public LatLng getPosition() {
+        return new LatLng(latitude,longitude);
+    }
+
+    @Override
+    public BitmapDescriptor getBitmapDescriptor() {
+        return BitmapDescriptorFactory.fromResource(R.drawable.ic_clock_in);
+    }
+
+    public void setPhotoName(String photoName) {
+        this.photoName = photoName;
+    }
 }
