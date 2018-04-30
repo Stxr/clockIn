@@ -63,10 +63,6 @@ public class EmployerActivity extends BaseMapActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSupportActionBar() != null) {
-            //隐藏标题栏
-            getSupportActionBar().hide();
-        }
         initData();
     }
 

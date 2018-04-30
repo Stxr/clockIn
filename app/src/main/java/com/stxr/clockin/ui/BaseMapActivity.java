@@ -6,6 +6,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.internal.NavigationMenu;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
@@ -43,9 +50,21 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
     FloatingActionMenu fab_menu;
     @BindView(R.id.bmapView)
     MapView mapView;
+    //底部提示栏
+    @BindView(R.id.rl_hint_bar)
+    RelativeLayout rl_hint_bar;
+    @BindView(R.id.tv_confirm)
+    TextView tv_confirm;
+    @BindView(R.id.tv_undo)
+    TextView tv_undo;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+    @BindView(R.id.nav_view)
+    NavigationView nav_view;
 
     protected BaiduMap baiduMap;
-    protected CustomLoadingDialog dialog;
     protected LocationClient locationClient;
     //当前所在位置
     protected BDLocation currentLocation;
@@ -78,11 +97,23 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        if (getSupportActionBar() != null) {
+            //隐藏标题栏
+            getSupportActionBar().hide();
+            setSupportActionBar(toolbar);
+        }
+
         ButterKnife.bind(this);
         initData();
     }
 
     private void initData() {
+        //显示左上角汉堡按钮
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
         //不显示放大缩小按钮
         mapView.showZoomControls(false);
         //实例化地图

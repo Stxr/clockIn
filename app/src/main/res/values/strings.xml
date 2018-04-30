@@ -14,4 +14,6 @@
     <string name="email_already_taken">邮箱已被注册</string>
     <string name="error_sign_up">注册失败</string>
     <string name="btn_confirm">确定</string>
+    <string name="navigation_drawer_open">打开侧边栏</string>
+    <string name="navigation_drawer_close">关闭侧边栏</string>
 </resources>

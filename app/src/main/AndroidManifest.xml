@@ -54,13 +54,16 @@
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.ChooseActivity" />
         <activity android:name=".ui.EmployerActivity"
-            android:theme="@style/FullscreenTheme"/>
-        <activity android:name=".ui.BossActivity" />
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ui.BossActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ui.SignUpActivity"
             android:label="注册账号"/>
         <activity android:name=".ui.SingleFragmentActivity" />
         <activity android:name=".ui.AskForLeaveActivity"
             android:label="请假申请"/>
+        <activity android:name=".ui.ClockInShowActivity" />
+        <activity android:name=".ui.LeaveShowActivity" />
 
         <provider
             android:authorities="com.stxr.clockin.photo_provider"

@@ -21,6 +21,8 @@ public class ClockIn extends BmobObject implements ClusterItem{
     private double longitude;
     private String photoName;
     private BmobFile photoFile;
+    private MyUser user;
+
 
 
     public ClockIn() {
@@ -29,8 +31,6 @@ public class ClockIn extends BmobObject implements ClusterItem{
         }
         photoName = "IMG_" + getObjectId() + ".jpg";
     }
-
-    private MyUser user;
 
     public double getLatitude() {
         return latitude;

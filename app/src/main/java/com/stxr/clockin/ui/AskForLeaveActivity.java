@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.stxr.clockin.R;
+import com.stxr.clockin.entity.MyUser;
 import com.stxr.clockin.entity.NoteForLeave;
 import com.stxr.clockin.utils.ToastUtil;
 
@@ -24,6 +25,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.SaveListener;
 
@@ -95,6 +97,7 @@ public class AskForLeaveActivity extends BaseActivity {
             note.setEndTime(endTime);
             note.setStartTime(startTime);
             note.setReason(reason);
+            note.setUser(BmobUser.getCurrentUser(MyUser.class));
             note.save(new SaveListener<String>() {
                 @Override
                 public void done(String s, BmobException e) {
