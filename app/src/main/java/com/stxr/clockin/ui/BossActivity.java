@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -26,8 +27,10 @@ import com.github.clans.fab.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.stxr.clockin.R;
+import com.stxr.clockin.adapter.ClockInShowAdapter;
 import com.stxr.clockin.entity.ClockIn;
 import com.stxr.clockin.entity.MyUser;
+import com.stxr.clockin.entity.NoteForLeave;
 import com.stxr.clockin.utils.ClockInUtil;
 import com.stxr.clockin.utils.ToastUtil;
 import com.stxr.clockin.utils.clusterutil.clustering.Cluster;
@@ -56,6 +59,7 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
     private List<MyItem> items = new ArrayList<>();
 
     private CustomDialog customDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,8 +79,10 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
     }
 
     void initData() {
+        //侧边栏初始化
         nav_view.inflateMenu(R.menu.drawer_menu_boss);
         nav_view.setNavigationItemSelectedListener(this);
+
         fab_see.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,6 +139,7 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
                 limits.clear();
                 fab_menu.close(true);
                 fab_menu.setVisibility(View.GONE);
+                tv_undo.setVisibility(View.GONE);
                 rl_hint_bar.setVisibility(View.VISIBLE);
             }
         });
@@ -174,8 +181,8 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
                 TextView tv_time = view.findViewById(R.id.tv_time);
                 ImageView imageView = view.findViewById(R.id.iv_location);
 
-                ClockInUtil.showOnUi(BossActivity.this,item,tv_name,tv_time,imageView);
-                customDialog = new CustomDialog(BossActivity.this,view, R.style.Theme_Dialog);
+                ClockInUtil.showOnUi(BossActivity.this, item, tv_name, tv_time, imageView);
+                customDialog = new CustomDialog(BossActivity.this, view, R.style.Theme_Dialog);
                 customDialog.show();
                 return false;
             }
@@ -197,9 +204,10 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
             drawLimit(limits);
         }
     }
+
     //打卡区域
     private void drawLimit(List<LatLng> list) {
-        if (list.size() >=3) {
+        if (list.size() >= 3) {
             OverlayOptions ooPolygon = new PolygonOptions().points(list)
                     .stroke(new Stroke(5, 0x88FFFF00)).fillColor(0x88FFFF00);
             baiduMap.addOverlay(ooPolygon);
@@ -250,7 +258,6 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
     }
 
 
-
     @Override
     LatLng firstFocusOnMap() {
         return new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -265,11 +272,35 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_clock_in:
-                startActivity(ClockInShowActivity.class);
+                dialog.show("正在加载中");
+                ClockInUtil.query(ClockIn.class, new FindListener<ClockIn>() {
+                    @Override
+                    public void done(List<ClockIn> clockIns, BmobException e) {
+                        if (e == null) {
+                            startActivity(ClockInShowActivity.newInstance(BossActivity.this, clockIns));
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 break;
             case R.id.menu_ask_for_leave:
-                startActivity(LeaveShowActivity.class);
+                dialog.show("正在加载中");
+                ClockInUtil.query(NoteForLeave.class, new FindListener<NoteForLeave>() {
+                    @Override
+                    public void done(List<NoteForLeave> notes, BmobException e) {
+                        if (e == null) {
+                            startActivity(LeaveShowActivity.newInstance(BossActivity.this, notes));
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 break;
+            case R.id.nav_quit:
+                BmobUser.logOut();   //清除缓存用户对象
+                startActivity(ChooseActivity.class);
+                finish();
+                break;
+
             default:
 
                 break;

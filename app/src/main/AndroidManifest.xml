@@ -52,7 +52,8 @@
         </activity>
         <activity android:name=".ui.SignInActivity" />
         <activity android:name=".ui.MainActivity" />
-        <activity android:name=".ui.ChooseActivity" />
+        <activity android:name=".ui.ChooseActivity"
+            android:launchMode="singleTask"/>
         <activity android:name=".ui.EmployerActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ui.BossActivity"

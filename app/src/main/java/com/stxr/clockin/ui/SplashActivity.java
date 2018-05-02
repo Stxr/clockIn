@@ -6,8 +6,11 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 
 import com.stxr.clockin.R;
+import com.stxr.clockin.entity.MyUser;
 
 import java.lang.ref.WeakReference;
+
+import cn.bmob.v3.BmobUser;
 
 /**
  * Created by stxr on 2018/4/15.
@@ -41,8 +44,15 @@ public class SplashActivity extends BaseActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == WHAT) {
-                //跳转到选择登录界面
-                activity.get().startActivity(ChooseActivity.class);
+                if (BmobUser.getCurrentUser() == null) {
+                    //跳转到选择登录界面
+                    activity.get().startActivity(ChooseActivity.class);
+
+                } else if (BmobUser.getCurrentUser(MyUser.class).isBoss()) {
+                    activity.get().startActivity(BossActivity.class);
+                } else {
+                    activity.get().startActivity(EmployerActivity.class);
+                }
                 //结束界面
                 activity.get().finish();
             }

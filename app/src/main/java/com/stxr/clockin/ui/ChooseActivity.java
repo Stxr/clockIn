@@ -34,6 +34,7 @@ public class ChooseActivity extends BaseActivity {
     void chooseWay(View v) {
         if (v.getId() == R.id.btn_boss) {  //老板登录
             startActivity(SignInActivity.newInstance(this,BOSS));
+
         } else if (v.getId() == R.id.btn_employer) {  //员工登录
             startActivity(SignInActivity.newInstance(this,EMPLOYER));
         }

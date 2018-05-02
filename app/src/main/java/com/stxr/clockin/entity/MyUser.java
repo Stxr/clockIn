@@ -8,6 +8,7 @@ import cn.bmob.v3.BmobUser;
 
 public class MyUser extends BmobUser {
     private boolean isBoss;
+    private MyUser MyBoss;
     private String limitArea;
     public boolean isBoss() {
         return isBoss;
@@ -23,5 +24,13 @@ public class MyUser extends BmobUser {
 
     public void setLimitArea(String limitArea) {
         this.limitArea = limitArea;
+    }
+
+    public MyUser getMyBoss() {
+        return MyBoss;
+    }
+
+    public void setMyBoss(MyUser myBoss) {
+        MyBoss = myBoss;
     }
 }

@@ -1,5 +1,7 @@
 package com.stxr.clockin.ui;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +13,7 @@ import com.stxr.clockin.entity.ClockIn;
 import com.stxr.clockin.entity.MyUser;
 import com.stxr.clockin.utils.ClockInUtil;
 
+import java.io.Serializable;
 import java.util.List;
 
 import butterknife.BindView;
@@ -24,7 +27,7 @@ import cn.bmob.v3.listener.FindListener;
 
 public class ClockInShowActivity extends BaseActivity {
 
-    private List<ClockIn> clockInList;
+    private static List<ClockIn> clockInList;
     @BindView(R.id.rv_show)
     RecyclerView recyclerView;
 
@@ -33,18 +36,13 @@ public class ClockInShowActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clock_in);
         ButterKnife.bind(this);
-        dialog = new CustomLoadingDialog(this, "正在加载");
-        dialog.show();
-        ClockInUtil.query(ClockIn.class, new FindListener<ClockIn>() {
-            @Override
-            public void done(List<ClockIn> clockIns, BmobException e) {
-                if (e == null) {
-                    dialog.dismiss();
-                    clockInList = clockIns;
-                    recyclerView.setLayoutManager(new LinearLayoutManager(ClockInShowActivity.this));
-                    recyclerView.setAdapter(new ClockInShowAdapter(ClockInShowActivity.this,clockIns));
-                }
-            }
-        });
+        recyclerView.setLayoutManager(new LinearLayoutManager(ClockInShowActivity.this));
+        recyclerView.setAdapter(new ClockInShowAdapter(ClockInShowActivity.this,clockInList));
+    }
+
+    public static Intent newInstance(Context context, List<ClockIn> list) {
+        clockInList = list;
+        Intent intent = new Intent(context, ClockInShowActivity.class);
+        return intent;
     }
 }

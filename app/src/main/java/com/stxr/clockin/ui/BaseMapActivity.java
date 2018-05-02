@@ -6,11 +6,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -31,12 +32,15 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.stxr.clockin.R;
 import com.stxr.clockin.entity.ClockIn;
+import com.stxr.clockin.entity.MyUser;
+import com.stxr.clockin.utils.ToastUtil;
+import com.stxr.clockin.view.CustomLoadingDialog;
 
-import java.time.Clock;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.bmob.v3.BmobUser;
 
 /**
  * Created by stxr on 2018/4/27.
@@ -44,6 +48,7 @@ import butterknife.ButterKnife;
 
 public abstract class BaseMapActivity extends BaseActivity implements SensorEventListener {
 
+    private static long FIRST_TIME = 0;
     //    private List<FloatingActionButton> fabs;
     //菜单
     @BindView(R.id.fab_menu)
@@ -102,12 +107,20 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
             getSupportActionBar().hide();
             setSupportActionBar(toolbar);
         }
-
         ButterKnife.bind(this);
         initData();
+
     }
 
     private void initData() {
+        //左边菜单头部
+        View view = LayoutInflater.from(this).inflate(R.layout.nav_header_main, nav_view,false);
+        TextView textView = view.findViewById(R.id.tv_name1);
+        TextView tv_character = view.findViewById(R.id.tv_character);
+        textView.setText(BmobUser.getCurrentUser(MyUser.class).getUsername());
+        tv_character.setText(BmobUser.getCurrentUser(MyUser.class).isBoss()?"管理员":"员工");
+        nav_view.addHeaderView(view);
+
         //显示左上角汉堡按钮
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -192,7 +205,17 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
         return button;
     }
 
-
+    /**
+     * 得到当前位置坐标
+     * @return
+     */
+    protected LatLng getCurrentLatLng() {
+        if (currentLocation != null) {
+            return new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        } else {
+            return null;
+        }
+    }
 
 
 
@@ -256,6 +279,16 @@ public abstract class BaseMapActivity extends BaseActivity implements SensorEven
         LatLngBounds bounds = builder.build();
         MapStatusUpdate u = MapStatusUpdateFactory.newLatLngBounds(bounds,mapView.getWidth(),mapView.getHeight());
         baiduMap.animateMapStatus(u);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis() - FIRST_TIME < 2000) {
+            finish();
+        } else {
+            FIRST_TIME = System.currentTimeMillis();
+            ToastUtil.show(this,"再按一次返回键退出");
+        }
     }
 }
 

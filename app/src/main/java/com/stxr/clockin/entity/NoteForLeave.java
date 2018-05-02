@@ -11,6 +11,7 @@ public class NoteForLeave extends BmobObject{
     private String startTime;
     private String endTime;
     private MyUser user;
+    private Boolean admit;
     public String getReason() {
         return reason;
     }
@@ -41,5 +42,13 @@ public class NoteForLeave extends BmobObject{
 
     public void setUser(MyUser user) {
         this.user = user;
+    }
+
+    public Boolean getAdmit() {
+        return admit;
+    }
+
+    public void setAdmit(Boolean admit) {
+        this.admit = admit;
     }
 }

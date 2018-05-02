@@ -51,7 +51,7 @@ public class AskForLeaveActivity extends BaseActivity {
         ButterKnife.bind(this);
         //默认设置为当天
         Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("Y-M-d,EE");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-M-d,EE",Locale.CHINESE);
         String format = dateFormat.format(date);
         tv_startTime.setText(format);
         tv_endTime.setText(format);
@@ -74,7 +74,7 @@ public class AskForLeaveActivity extends BaseActivity {
                         int year = datePicker.getYear();
                         Date time = new GregorianCalendar(year, month, day).getTime();
                         TextView textView = (TextView) v;
-                        SimpleDateFormat format = new SimpleDateFormat("Y-M-d,EE", Locale.CHINESE);
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d,EE", Locale.CHINESE);
                         textView.setText(format.format(time));
                     }
                 })

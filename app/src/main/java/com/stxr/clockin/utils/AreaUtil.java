@@ -12,7 +12,8 @@ public class AreaUtil {
     //判断一个点是否在多边形内部
     public static boolean withinArea(LatLng testPoint, List<LatLng> area) {
         int crossings = 0;
-        for (int i = 0;i < area.size();i++) {
+        if(area==null) return false;
+        for (int i = 0;i < area.size()-1;i++) {
             //斜率
             double slope = (area.get(i + 1).latitude - area.get(i).latitude) / (area.get(i + 1).longitude - area.get(i).longitude);
             boolean cond1 = (area.get(i).longitude <= testPoint.longitude) && (area.get(i + 1).longitude > testPoint.longitude);

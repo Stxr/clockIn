@@ -12,6 +12,7 @@ import com.stxr.clockin.R;
 import com.stxr.clockin.entity.MyUser;
 import com.stxr.clockin.utils.SavePassword;
 import com.stxr.clockin.utils.ToastUtil;
+import com.stxr.clockin.view.CustomLoadingDialog;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,6 +101,7 @@ public class SignInActivity extends BaseActivity {
                             if (e == null && myUser.isBoss()) {
                                 SavePassword.saveBossPassword(SignInActivity.this,myUser.getUsername(),edt_password.getText().toString());
                                 startActivity(BossActivity.class);
+                                finish();
                             } else {
                                 ToastUtil.show(SignInActivity.this, "账号密码错误");
                             }
