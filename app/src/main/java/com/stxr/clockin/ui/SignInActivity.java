@@ -66,6 +66,11 @@ public class SignInActivity extends BaseActivity {
         }
     }
 
+    @OnClick(R.id.tv_find_password)
+    void forgotPassoword() {
+        startActivity(FindPasswordActivity.class);
+    }
+
     @OnClick({R.id.btn_sign_in,R.id.tv_sign_up})
     void onClick(View v) {
         switch (v.getId()) {
