@@ -1,5 +1,7 @@
 package com.stxr.clockin.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -11,8 +13,12 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.baidu.mapapi.model.LatLng;
 import com.github.clans.fab.FloatingActionButton;
@@ -30,6 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.datatype.BmobPointer;
@@ -37,6 +44,7 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
+import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
 /**
@@ -49,6 +57,7 @@ public class EmployerActivity extends BaseMapActivity implements NavigationView.
     //请假菜单
     private FloatingActionButton fab_leave;
     private FloatingActionButton fab_clockIn;
+    private FloatingActionButton fab_choose;
     private List<LatLng> limits;
 
 
@@ -57,8 +66,10 @@ public class EmployerActivity extends BaseMapActivity implements NavigationView.
         List<FloatingActionButton> buttons = new ArrayList<>();
         fab_leave = createFAB(R.color.colorPrimary, R.color.colorPrimaryDark, R.drawable.ic_leave, "请假");
         fab_clockIn = createFAB(R.color.colorPrimary, R.color.colorPrimaryDark, R.drawable.clock_in, "打卡");
+        fab_choose = createFAB(R.color.colorPrimary, R.color.colorPrimaryDark, R.drawable.ic_action_admin, "选择管理员");
         buttons.add(fab_clockIn);
         buttons.add(fab_leave);
+        buttons.add(fab_choose);
         return buttons;
     }
 
@@ -75,22 +86,30 @@ public class EmployerActivity extends BaseMapActivity implements NavigationView.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadingLimitArea();
         initData();
+        MyUser currentUser = BmobUser.getCurrentUser(MyUser.class);
+        if (currentUser.getMyBoss().getObjectId().equals("")) {
+            chooseBoss();
+        } else {
+            loadingLimitArea();
+        }
     }
 
     /**
      * 加载boss划定的限制区域
      */
     private void loadingLimitArea() {
+        if(limits!=null) limits.clear();
         final MyUser user = BmobUser.getCurrentUser(MyUser.class);
         if (user.getMyBoss() != null) {
             ClockInUtil.query(MyUser.class, user.getMyBoss().getObjectId(), new QueryListener<MyUser>() {
                 @Override
                 public void done(MyUser myUser, BmobException e) {
-                    Gson gson = new Gson();
-                    limits = gson.fromJson(myUser.getLimitArea(), new TypeToken<List<LatLng>>() {
-                    }.getType());
+                    if (e == null) {
+                        Gson gson = new Gson();
+                        limits = gson.fromJson(myUser.getLimitArea(), new TypeToken<List<LatLng>>() {
+                        }.getType());
+                    }
                 }
             });
         }
@@ -115,6 +134,61 @@ public class EmployerActivity extends BaseMapActivity implements NavigationView.
                 askForLeave();
             }
         });
+        fab_choose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fab_menu.close(true);
+                chooseBoss();
+            }
+        });
+    }
+
+
+    void chooseBoss() {
+        BmobQuery<MyUser> query = new BmobQuery<>();
+        query.findObjects(new FindListener<MyUser>() {
+            @Override
+            public void done(List<MyUser> list, BmobException e) {
+                if (e == null) {
+                    List<MyUser> boss = new ArrayList<>();
+                    for (MyUser user : list) {
+                        if (user.isBoss()) {
+                            boss.add(user);
+                        }
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(EmployerActivity.this);
+                    final Spinner spinner = new Spinner(EmployerActivity.this);
+                    spinner.setAdapter(new ArrayAdapter<>(EmployerActivity.this, android.R.layout.simple_list_item_1, boss));
+                    builder.setTitle("选择Boss")
+                            .setView(spinner)
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    MyUser boss = (MyUser) spinner.getSelectedItem();
+                                    MyUser currentUser = BmobUser.getCurrentUser(MyUser.class);
+                                    currentUser.setMyBoss(boss);
+                                    currentUser.update(new UpdateListener() {
+                                        @Override
+                                        public void done(BmobException e) {
+                                            if (e == null) {
+                                                ToastUtil.show(EmployerActivity.this, "更改成功");
+                                                //更新打卡区域
+                                                loadingLimitArea();
+                                                //initData();
+                                            }
+                                        }
+                                    });
+                                }
+                            })
+                            .create()
+                            .show();
+
+                } else {
+                    ToastUtil.show(EmployerActivity.this, e.getMessage());
+                }
+            }
+        });
+
     }
 
     //签到

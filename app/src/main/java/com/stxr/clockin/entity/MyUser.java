@@ -33,4 +33,9 @@ public class MyUser extends BmobUser {
     public void setMyBoss(MyUser myBoss) {
         MyBoss = myBoss;
     }
+
+    @Override
+    public String toString() {
+        return super.getUsername();
+    }
 }

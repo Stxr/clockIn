@@ -82,7 +82,6 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
         //侧边栏初始化
         nav_view.inflateMenu(R.menu.drawer_menu_boss);
         nav_view.setNavigationItemSelectedListener(this);
-
         fab_see.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -211,7 +210,6 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
             OverlayOptions ooPolygon = new PolygonOptions().points(list)
                     .stroke(new Stroke(5, 0x88FFFF00)).fillColor(0x88FFFF00);
             baiduMap.addOverlay(ooPolygon);
-
         } else {
 //            ToastUtil.show(BossActivity.this, "必须大于等于3个点");
         }
