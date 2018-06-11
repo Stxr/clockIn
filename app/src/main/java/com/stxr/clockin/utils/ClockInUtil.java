@@ -47,6 +47,7 @@ public class ClockInUtil {
         boolean isCache = queryClockIn.hasCachedResult(tClass);
         //降序排列
         queryClockIn.order("-createdAt");
+        queryClockIn.include("user");
         if (isCache) {
             queryClockIn.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);   // 如果有缓存的话，则设置策略为CACHE_ELSE_NETWORK
         } else {
@@ -61,6 +62,7 @@ public class ClockInUtil {
         queryClockIn.addWhereEqualTo(key, value);
         //降序排列
         queryClockIn.order("-createdAt");
+        //queryClockIn.include("user");
         if (isCache) {
             queryClockIn.setCachePolicy(BmobQuery.CachePolicy.CACHE_ELSE_NETWORK);   // 如果有缓存的话，则设置策略为CACHE_ELSE_NETWORK
         } else {

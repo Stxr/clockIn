@@ -1,6 +1,7 @@
 package com.stxr.clockin.ui;
 
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -59,6 +60,7 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
     private List<MyItem> items = new ArrayList<>();
 
     private CustomDialog customDialog;
+    private MyUser boss;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,9 +71,9 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
 
     private void loadingData() {
         Gson gson = new Gson();
-        MyUser user = BmobUser.getCurrentUser(MyUser.class);
-        if (user.getLimitArea() != null) {
-            List<LatLng> area = gson.fromJson(user.getLimitArea(), new TypeToken<List<LatLng>>() {
+        boss = BmobUser.getCurrentUser(MyUser.class);
+        if (boss.getLimitArea() != null) {
+            List<LatLng> area = gson.fromJson(boss.getLimitArea(), new TypeToken<List<LatLng>>() {
             }.getType());
             drawLimit(area);
         }
@@ -275,7 +277,13 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
                     @Override
                     public void done(List<ClockIn> clockIns, BmobException e) {
                         if (e == null) {
-                            startActivity(ClockInShowActivity.newInstance(BossActivity.this, clockIns));
+                            List<ClockIn> clockInList = new ArrayList<>();
+                            for (ClockIn clockIn : clockIns) {
+                                if (clockIn.getUser().getMyBoss().getObjectId().equals(boss.getObjectId())) {
+                                    clockInList.add(clockIn);
+                                }
+                            }
+                            startActivity(ClockInShowActivity.newInstance(BossActivity.this, clockInList));
                             dialog.dismiss();
                         }
                     }
@@ -287,7 +295,13 @@ public class BossActivity extends BaseMapActivity implements NavigationView.OnNa
                     @Override
                     public void done(List<NoteForLeave> notes, BmobException e) {
                         if (e == null) {
-                            startActivity(LeaveShowActivity.newInstance(BossActivity.this, notes));
+                            List<NoteForLeave> noteForLeaves = new ArrayList<>();
+                            for (NoteForLeave noteForLeave : notes) {
+                                if (noteForLeave.getUser().getMyBoss().getObjectId().equals(boss.getObjectId())) {
+                                    noteForLeaves.add(noteForLeave);
+                                }
+                            }
+                            startActivity(LeaveShowActivity.newInstance(BossActivity.this, noteForLeaves));
                             dialog.dismiss();
                         }
                     }
